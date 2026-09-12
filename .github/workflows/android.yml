@@ -33,8 +33,17 @@ jobs:
         with:
           gradle-version: 8.5
 
+      - name: Show project structure
+        run: |
+          echo "=== Project root ==="
+          ls -la
+          echo "=== App module ==="
+          ls -la app/
+          echo "=== Gradle wrapper ==="
+          ls -la gradle/wrapper/
+
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle assembleDebug --no-daemon --stacktrace --info
 
       - name: Find APK
         id: find_apk
