@@ -47,6 +47,13 @@ jobs:
           echo "=== BUILD LOG (last 300 lines) ==="
           tail -300 build.log
 
+      - name: Show build outputs
+        run: |
+          echo "=== app/build/outputs ==="
+          find app/build/outputs -type f 2>/dev/null | head -50
+          echo "=== All APKs ==="
+          find . -name "*.apk" -type f 2>/dev/null
+
       - name: Upload build log
         uses: actions/upload-artifact@v4
         if: always()
