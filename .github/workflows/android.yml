@@ -33,36 +33,17 @@ jobs:
         with:
           gradle-version: 8.5
 
-      - name: Show project structure
-        run: |
-          echo "=== Project root ==="
-          ls -la
-          echo "=== App module ==="
-          ls -la app/
-          echo "=== Gradle wrapper ==="
-          ls -la gradle/wrapper/
-
       - name: Build Debug APK
-        run: |
-          gradle assembleDebug --no-daemon --stacktrace --info > build.log 2>&1 || true
-          echo "=== BUILD LOG (last 200 lines) ==="
-          tail -200 build.log
+        run: gradle assembleDebug --no-daemon --stacktrace
 
-      - name: Upload build log
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build.log
-          retention-days: 7
-
-      - name: Find APK
+      - name: Find APK (broad search)
         id: find_apk
         run: |
-          APK_PATH=$(find app/build -name "*.apk" -type f 2>/dev/null | head -1)
+          echo "=== Searching for APK ==="
+          APK_PATH=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
           if [ -z "$APK_PATH" ]; then
-            echo "No APK found!"
-            find app/build -type f -name "*.apk" 2>/dev/null || true
-            ls -la app/build/outputs/ 2>/dev/null || true
+            echo "No APK found anywhere!"
+            find . -name "*.apk" -type f 2>/dev/null || true
             exit 1
           fi
           echo "Found APK: $APK_PATH"
