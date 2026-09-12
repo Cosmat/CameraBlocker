@@ -34,13 +34,22 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: List build outputs
-        run: find app/build -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+      - name: Find APK
+        id: find_apk
+        run: |
+          APK_PATH=$(find app/build -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found!"
+            find app/build -type f -name "*.apk" 2>/dev/null || true
+            ls -la app/build/outputs/ 2>/dev/null || true
+            exit 1
+          fi
+          echo "Found APK: $APK_PATH"
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug.apk
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+          path: ${{ steps.find_apk.outputs.apk_path }}
           retention-days: 7
