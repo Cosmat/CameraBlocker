@@ -1,0 +1,7 @@
+.gradle/
+build/
+*.zip
+gradle-*/
+openjdk.zip
+.idea/
+*.iml

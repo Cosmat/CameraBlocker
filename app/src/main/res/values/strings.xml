@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Camera Blocker</string>
+    <string name="accessibility_service_name">Camera Blocker Overlay</string>
+    <string name="accessibility_service_description">Показывает чёрный экран поверх камерных приложений, имитируя неисправную камеру.</string>
+    <string name="active">АКТИВЕН</string>
+    <string name="inactive">ОТКЛЮЧЕН</string>
+</resources>

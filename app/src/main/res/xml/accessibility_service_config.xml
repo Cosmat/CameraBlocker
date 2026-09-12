@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeNotificationStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="100"
+    android:packageNames="com.android.camera,com.google.android.GoogleCamera,com.sec.android.app.camera,com.mi.android.camera,com.oneplus.camera,com.coloros.camera,com.oppo.camera,com.huawei.camera,com.motorola.camera"
+    android:settingsActivity="com.uvz.camerablocker.MainActivity" />
