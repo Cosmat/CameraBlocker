@@ -58,9 +58,9 @@ jobs:
       - name: Check Android plugin is applied
         run: ./gradlew app:properties --no-daemon | grep -E "(android|applicationId|compileSdk)" || true
 
-      - name: Build Debug APK with full info
+      - name: Build Debug APK (FAIL ON ERROR)
         run: |
-          ./gradlew assembleDebug --no-daemon --stacktrace --info > build.log 2>&1 || true
+          ./gradlew assembleDebug --no-daemon --stacktrace --info > build.log 2>&1
           echo "=== BUILD LOG (last 1000 lines) ==="
           tail -1000 build.log
 
@@ -105,7 +105,6 @@ jobs:
           if [ -z "$APK_PATH" ]; then
             echo "No APK found anywhere!"
             find . -name "*.apk" -type f 2>/dev/null || true
-            # Also check for AAB
             AAB_PATH=$(find . -name "*.aab" -type f 2>/dev/null | head -1)
             if [ -n "$AAB_PATH" ]; then
               echo "Found AAB instead: $AAB_PATH"
