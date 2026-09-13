@@ -3,6 +3,7 @@ package com.uvz.camerablocker
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
@@ -84,7 +85,7 @@ class CameraAccessibilityService : AccessibilityService() {
         // Дополнительная проверка: если приложение объявило ACTION_IMAGE_CAPTURE
         val pm = packageManager
         try {
-            val info = pm.getPackageInfo(packageName, 0)
+            val info = pm.getPackageInfo(packageName, PackageManager.GET_INTENT_FILTERS)
             val activities = info.activities ?: return false
             for (activity in activities) {
                 val filters = activity.intentFilters
