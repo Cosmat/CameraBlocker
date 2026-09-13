@@ -2,6 +2,7 @@ package com.uvz.camerablocker
 
 import android.app.Service
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
@@ -55,7 +56,7 @@ class OverlayService : Service() {
         val alpha = app.getOverlayAlpha().toFloat()
 
         overlayView = FrameLayout(this).apply {
-            setBackgroundColor(0xFF000000.toInt()) // Чёрный
+            setBackgroundColor(Color.BLACK) // Чёрный
             this.alpha = alpha / 255f
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
