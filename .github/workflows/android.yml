@@ -56,13 +56,13 @@ jobs:
         run: ./gradlew tasks --all --no-daemon
 
       - name: Show build variants
-        run: ./gradlew app:buildVariants --no-daemon || true
+        run: ./gradlew app:buildVariants --no-daemon
 
       - name: Build Debug APK with full info
         run: |
           ./gradlew assembleDebug --no-daemon --stacktrace --info > build.log 2>&1 || true
-          echo "=== BUILD LOG (last 800 lines) ==="
-          tail -800 build.log
+          echo "=== BUILD LOG (last 1000 lines) ==="
+          tail -1000 build.log
 
       - name: Show build outputs structure
         run: |
@@ -74,6 +74,14 @@ jobs:
           echo ""
           echo "=== app/build/outputs/apk ==="
           ls -la app/build/outputs/apk/ 2>/dev/null || echo "Directory not found"
+
+      - name: Check if app module exists and has build dir
+        run: |
+          echo "=== App module dir ==="
+          ls -la app/
+          echo ""
+          echo "=== App build dir ==="
+          ls -la app/build/ 2>/dev/null || echo "No build dir"
 
       - name: Upload build log
         uses: actions/upload-artifact@v4
