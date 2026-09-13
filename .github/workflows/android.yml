@@ -72,8 +72,14 @@ jobs:
           echo "=== All APKs ==="
           find . -name "*.apk" -type f 2>/dev/null
           echo ""
+          echo "=== All AABs ==="
+          find . -name "*.aab" -type f 2>/dev/null
+          echo ""
           echo "=== app/build/outputs/apk ==="
           ls -la app/build/outputs/apk/ 2>/dev/null || echo "Directory not found"
+          echo ""
+          echo "=== app/build/outputs/bundle ==="
+          ls -la app/build/outputs/bundle/ 2>/dev/null || echo "Directory not found"
 
       - name: Check if app module exists and has build dir
         run: |
@@ -99,6 +105,13 @@ jobs:
           if [ -z "$APK_PATH" ]; then
             echo "No APK found anywhere!"
             find . -name "*.apk" -type f 2>/dev/null || true
+            # Also check for AAB
+            AAB_PATH=$(find . -name "*.aab" -type f 2>/dev/null | head -1)
+            if [ -n "$AAB_PATH" ]; then
+              echo "Found AAB instead: $AAB_PATH"
+              echo "apk_path=$AAB_PATH" >> $GITHUB_OUTPUT
+              exit 0
+            fi
             exit 1
           fi
           echo "Found APK: $APK_PATH"
