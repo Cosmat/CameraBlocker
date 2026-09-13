@@ -55,6 +55,9 @@ jobs:
       - name: List all Gradle tasks
         run: ./gradlew tasks --all --no-daemon
 
+      - name: Check Android plugin is applied
+        run: ./gradlew app:properties --no-daemon | grep -E "(android|applicationId|compileSdk)" || true
+
       - name: Build Debug APK with full info
         run: |
           ./gradlew assembleDebug --no-daemon --stacktrace --info > build.log 2>&1 || true
