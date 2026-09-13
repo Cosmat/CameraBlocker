@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK - Full Diagnostic
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
@@ -41,21 +41,39 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: List Gradle tasks
-        run: ./gradlew tasks --no-daemon
+      - name: Show project structure
+        run: |
+          echo "=== Root build.gradle.kts ==="
+          cat build.gradle.kts
+          echo ""
+          echo "=== App build.gradle.kts ==="
+          cat app/build.gradle.kts
+          echo ""
+          echo "=== Settings ==="
+          cat settings.gradle.kts
 
-      - name: Build Debug APK with info
+      - name: List all Gradle tasks
+        run: ./gradlew tasks --all --no-daemon
+
+      - name: Show build variants
+        run: ./gradlew app:buildVariants --no-daemon || true
+
+      - name: Build Debug APK with full info
         run: |
           ./gradlew assembleDebug --no-daemon --stacktrace --info > build.log 2>&1 || true
-          echo "=== BUILD LOG (last 500 lines) ==="
-          tail -500 build.log
+          echo "=== BUILD LOG (last 800 lines) ==="
+          tail -800 build.log
 
-      - name: Show build outputs
+      - name: Show build outputs structure
         run: |
           echo "=== app/build/outputs ==="
-          find app/build/outputs -type f 2>/dev/null | head -50
+          find app/build/outputs -type f 2>/dev/null | head -100
+          echo ""
           echo "=== All APKs ==="
           find . -name "*.apk" -type f 2>/dev/null
+          echo ""
+          echo "=== app/build/outputs/apk ==="
+          ls -la app/build/outputs/apk/ 2>/dev/null || echo "Directory not found"
 
       - name: Upload build log
         uses: actions/upload-artifact@v4
