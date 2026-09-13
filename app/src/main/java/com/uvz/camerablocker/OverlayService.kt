@@ -52,7 +52,7 @@ class OverlayService : Service() {
         if (overlayView != null) return
 
         val app = application as CameraBlockerApp
-        val alpha = app.getOverlayAlpha()
+        val alpha = app.getOverlayAlpha().toFloat()
 
         overlayView = FrameLayout(this).apply {
             setBackgroundColor(0xFF000000) // Чёрный
@@ -104,7 +104,7 @@ class OverlayService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Camera Blocker")
             .setContentText("Камера заблокирована (чёрный экран)")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()
