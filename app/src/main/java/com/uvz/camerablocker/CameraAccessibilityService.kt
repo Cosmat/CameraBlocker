@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
@@ -85,19 +86,16 @@ class CameraAccessibilityService : AccessibilityService() {
         // Дополнительная проверка: если приложение объявило ACTION_IMAGE_CAPTURE
         val pm = packageManager
         try {
-            val info = pm.getPackageInfo(packageName, PackageManager.GET_INTENT_FILTERS)
-            val activities = info.activities ?: return false
-            for (activity in activities) {
-                val filters = activity.intentFilters
-                if (filters != null) {
-                    for (filter in filters) {
-                        if (filter.hasAction("android.media.action.IMAGE_CAPTURE") ||
-                            filter.hasAction("android.media.action.VIDEO_CAPTURE")) {
-                            return true
-                        }
-                    }
-                }
-            }
+            // Используем queryIntentActivities для проверки support capture intents
+            val captureIntent = Intent("android.media.action.IMAGE_CAPTURE")
+            val videoCaptureIntent = Intent("android.media.action.VIDEO_CAPTURE")
+            captureIntent.`package` = packageName
+            videoCaptureIntent.`package` = packageName
+
+            val captureActivities = pm.queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            val videoActivities = pm.queryIntentActivities(videoCaptureIntent, PackageManager.MATCH_DEFAULT_ONLY)
+
+            return captureActivities.isNotEmpty() || videoActivities.isNotEmpty()
         } catch (e: Exception) {
             // ignore
         }
