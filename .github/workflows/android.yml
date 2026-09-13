@@ -55,9 +55,6 @@ jobs:
       - name: List all Gradle tasks
         run: ./gradlew tasks --all --no-daemon
 
-      - name: Show build variants
-        run: ./gradlew app:buildVariants --no-daemon
-
       - name: Build Debug APK with full info
         run: |
           ./gradlew assembleDebug --no-daemon --stacktrace --info > build.log 2>&1 || true
