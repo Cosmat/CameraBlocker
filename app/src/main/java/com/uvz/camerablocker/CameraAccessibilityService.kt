@@ -47,12 +47,9 @@ class CameraAccessibilityService : AccessibilityService() {
         }
 
         event?.let {
-            when (it.eventType) {
-                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
-                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-                    val packageName = it.packageName?.toString() ?: ""
-                    checkAndToggleOverlay(packageName)
-                }
+            if (it.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                val packageName = it.packageName?.toString() ?: ""
+                checkAndToggleOverlay(packageName)
             }
         }
     }

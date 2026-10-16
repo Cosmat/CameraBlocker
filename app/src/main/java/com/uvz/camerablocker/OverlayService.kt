@@ -27,6 +27,14 @@ class OverlayService : Service() {
     private var overlayView: View? = null
     private var windowManager: WindowManager? = null
 
+    // Страховка: даже если accessibility умрёт при поднятом оверлее — гасим сами через 10 минут
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val autoHide = Runnable {
+        hideOverlay()
+        stopForeground(true)
+        stopSelf()
+    }
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -39,8 +47,11 @@ class OverlayService : Service() {
             ACTION_SHOW -> {
                 showOverlay()
                 startForeground(NOTIFICATION_ID, buildNotification())
+                handler.removeCallbacks(autoHide)
+                handler.postDelayed(autoHide, 10 * 60 * 1000L) // 10 минут максимум
             }
             ACTION_HIDE -> {
+                handler.removeCallbacks(autoHide)
                 hideOverlay()
                 stopForeground(true)
                 stopSelf()
