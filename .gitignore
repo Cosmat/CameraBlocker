@@ -5,3 +5,4 @@ gradle-*/
 openjdk.zip
 .idea/
 *.iml
+local.properties

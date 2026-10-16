@@ -52,16 +52,46 @@ class OverlayService : Service() {
     private fun showOverlay() {
         if (overlayView != null) return
 
-        val app = application as CameraBlockerApp
-        val alpha = app.getOverlayAlpha().toFloat()
+        val density = resources.displayMetrics.density
+        fun dp(v: Int) = (v * density).toInt()
 
-        overlayView = FrameLayout(this).apply {
-            setBackgroundColor(Color.BLACK) // Чёрный
-            this.alpha = alpha / 255f
+        // Сообщение «камера демонтирована» по центру чёрного фона
+        val textLayout = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
+        }
+
+        val title = android.widget.TextView(this).apply {
+            text = "⚠ Камера недоступна"
+            setTextColor(Color.WHITE)
+            textSize = 26f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+        }
+
+        val subtitle = android.widget.TextView(this).apply {
+            text = "Датчик демонтирован или неисправен"
+            setTextColor(0xFFB0B0B0.toInt())
+            textSize = 15f
+            gravity = Gravity.CENTER
+            setPadding(0, dp(12), 0, 0)
+        }
+
+        textLayout.addView(title)
+        textLayout.addView(subtitle)
+
+        overlayView = FrameLayout(this).apply {
+            setBackgroundColor(Color.BLACK) // всегда полностью чёрный
+            alpha = 1f
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            addView(textLayout)
         }
 
         val params = WindowManager.LayoutParams(
