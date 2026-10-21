@@ -40,6 +40,19 @@
             android:foregroundServiceType="specialUse"
             android:exported="false" />
 
+        <!-- Device Admin: системное отключение камеры (как у Cameraless) -->
+        <receiver
+            android:name=".CameraDeviceAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Main Activity — настройки и вкл/выкл -->
         <activity
             android:name=".MainActivity"
@@ -60,6 +73,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

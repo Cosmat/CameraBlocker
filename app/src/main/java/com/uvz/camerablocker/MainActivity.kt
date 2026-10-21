@@ -1,5 +1,7 @@
 package com.uvz.camerablocker
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -37,8 +39,17 @@ class MainActivity : AppCompatActivity() {
 
         switchEnable.setOnCheckedChangeListener { _, isChecked ->
             app.setBlockerEnabled(isChecked)
+            if (isChecked) {
+                if (app.isDeviceAdminActive()) {
+                    app.setCameraDisabled(true)
+                } else {
+                    // Разовое исключение: системный экран активации админа
+                    requestAdminActivation()
+                }
+            } else {
+                app.setCameraDisabled(false)
+            }
             updateUI()
-            if (isChecked) requestOverlayPermission()
         }
 
         seekAlpha.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -73,13 +84,50 @@ class MainActivity : AppCompatActivity() {
         updateUI()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1002) {
+            if (resultCode == RESULT_OK) {
+                // Админ активирован — сразу отключаем камеру
+                app.setCameraDisabled(true)
+            } else {
+                // Отказ — возвращаем переключатель
+                app.setBlockerEnabled(false)
+            }
+            updateUI()
+        }
+    }
+
+    private fun requestAdminActivation() {
+        val comp = ComponentName(this, CameraDeviceAdminReceiver::class.java)
+        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, comp)
+            putExtra(
+                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Активация отключает камеру на уровне системы (проходная УВЗ). Выключить обратно можно тем же переключателем."
+            )
+        }
+        startActivityForResult(intent, 1002)
+    }
+
     private fun updateUI() {
         val enabled = app.isBlockerEnabled()
         switchEnable.isChecked = enabled
         seekAlpha.progress = app.getOverlayAlpha()
         txtAlpha.text = "Прозрачность оверлея: ${app.getOverlayAlpha()}%"
-        txtStatus.text = if (enabled) "Статус: АКТИВЕН (чёрный экран при камере)" else "Статус: ОТКЛЮЧЕН"
-        txtStatus.setTextColor(ContextCompat.getColor(this, if (enabled) R.color.active else R.color.inactive))
+        val camDisabled = app.isCameraSystemDisabled()
+        txtStatus.text = when {
+            camDisabled -> "Камера ОТКЛЮЧЕНА системой (для проходной)"
+            app.isDeviceAdminActive() -> "Админ активен, камера разрешена"
+            enabled -> "Включи переключатель и подтверди администратора"
+            else -> "Статус: ОТКЛЮЧЕН (камера работает как обычно)"
+        }
+        txtStatus.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (camDisabled) R.color.active else R.color.inactive
+            )
+        )
     }
 
     private fun requestOverlayPermission() {

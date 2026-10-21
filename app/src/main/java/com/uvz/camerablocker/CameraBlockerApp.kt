@@ -1,6 +1,9 @@
 package com.uvz.camerablocker
 
 import android.app.Application
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 
@@ -29,5 +32,25 @@ class CameraBlockerApp : Application() {
 
     fun setOverlayAlpha(alpha: Int) {
         sharedPrefs.edit().putInt(KEY_OVERLAY_ALPHA, alpha.coerceIn(0, 255)).apply()
+    }
+
+    // ---------- Device Admin: системное отключение камеры ----------
+
+    private fun adminComponent(): ComponentName =
+        ComponentName(this, CameraDeviceAdminReceiver::class.java)
+
+    private fun dpm(): DevicePolicyManager =
+        getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+
+    fun isDeviceAdminActive(): Boolean = dpm().isAdminActive(adminComponent())
+
+    /** true = камера реально отключена на уровне ОС (ни одно приложение не откроет её) */
+    fun isCameraSystemDisabled(): Boolean =
+        isDeviceAdminActive() && dpm().getCameraDisabled(adminComponent())
+
+    fun setCameraDisabled(disabled: Boolean): Boolean {
+        if (!isDeviceAdminActive()) return false
+        dpm().setCameraDisabled(adminComponent(), disabled)
+        return true
     }
 }

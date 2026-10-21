@@ -8,14 +8,19 @@ import android.util.Log
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("CameraBlocker", "Boot received: ${intent.action}")
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
-            intent.action == "android.intent.action.QUICKBOOT_POWERON") {
-            // Перезапускаем Accessibility Service через запуск MainActivity
-            val startIntent = Intent(context, MainActivity::class.java)
-            startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startIntent.putExtra("auto_start", true)
-            context.startActivity(startIntent)
+        val action = intent.action ?: return
+        Log.d("CameraBlocker", "Boot received: $action")
+        if (action == Intent.ACTION_BOOT_COMPLETED ||
+            action == "android.intent.action.QUICKBOOT_POWERON" ||
+            action == Intent.ACTION_MY_PACKAGE_REPLACED
+        ) {
+            // Device Admin политика переживает ребут сама (её держит система),
+            // но переподтверждаем на случай сбоя
+            val app = context.applicationContext as CameraBlockerApp
+            if (app.isBlockerEnabled() && app.isDeviceAdminActive()) {
+                val ok = app.setCameraDisabled(true)
+                Log.d("CameraBlocker", "Re-assert camera disabled: $ok")
+            }
         }
     }
 }
