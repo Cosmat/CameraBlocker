@@ -2,8 +2,8 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
-    android:canRetrieveWindowContent="true"
+    android:canRetrieveWindowContent="false"
     android:description="@string/accessibility_service_description"
     android:notificationTimeout="100"
+    android:packageNames="com.android.camera,com.google.android.GoogleCamera,com.sec.android.app.camera,com.mi.android.camera,com.oneplus.camera,com.coloros.camera,com.oppo.camera,com.huawei.camera,com.motorola.camera,com.sonyericsson.android.camera,com.asus.camera,com.nokia.camera,com.htc.camera,com.miui.home,com.android.launcher3,com.android.launcher,com.google.android.apps.nexuslauncher,com.sec.android.app.launcher,com.huawei.android.launcher,com.oppo.launcher,com.vivo.launcher,com.teslacoilsw.launcher,com.whatsapp,org.telegram.messenger,com.instagram.android"
     android:settingsActivity="com.uvz.camerablocker.MainActivity" />
