@@ -40,17 +40,8 @@ class MainActivity : AppCompatActivity() {
 
         switchEnable.setOnCheckedChangeListener { _, isChecked ->
             app.setBlockerEnabled(isChecked)
-            if (isChecked) {
-                if (app.isDeviceAdminActive()) {
-                    app.setCameraDisabled(true)
-                } else {
-                    // Разовое исключение: системный экран активации админа
-                    requestAdminActivation()
-                }
-            } else {
-                app.setCameraDisabled(false)
-            }
             updateUI()
+            if (isChecked) requestOverlayPermission()
         }
 
         seekAlpha.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -86,37 +77,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Просроченное приложение не оставляет камеру замком — иначе юзер без камеры
-        if (!License.isValid(this) && app.isCameraSystemDisabled()) {
-            app.setCameraDisabled(false)
-        }
         updateUI()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1002) {
-            if (resultCode == RESULT_OK) {
-                // Админ активирован — сразу отключаем камеру
-                app.setCameraDisabled(true)
-            } else {
-                // Отказ — возвращаем переключатель
-                app.setBlockerEnabled(false)
-            }
+        if (requestCode == 1001) {
             updateUI()
         }
-    }
-
-    private fun requestAdminActivation() {
-        val comp = ComponentName(this, CameraDeviceAdminReceiver::class.java)
-        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, comp)
-            putExtra(
-                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                "Активация отключает камеру на уровне системы (проходная УВЗ). Выключить обратно можно тем же переключателем."
-            )
-        }
-        startActivityForResult(intent, 1002)
     }
 
     private fun showLicenseDialog() {
@@ -146,18 +114,16 @@ class MainActivity : AppCompatActivity() {
         switchEnable.isEnabled = !expired
         seekAlpha.progress = app.getOverlayAlpha()
         txtAlpha.text = "Прозрачность оверлея: ${app.getOverlayAlpha()}%"
-        val camDisabled = app.isCameraSystemDisabled()
+        val camDisabled = false
         txtStatus.text = when {
             expired -> "Срок работы окончен. Код продления — у Алексея"
-            camDisabled -> "Камера ОТКЛЮЧЕНА системой (для проходной)"
-            app.isDeviceAdminActive() -> "Админ активен, камера разрешена"
-            enabled -> "Включи переключатель и подтверди администратора"
+            enabled -> "Статус: АКТИВЕН (чёрный экран при камере)"
             else -> "Статус: ОТКЛЮЧЕН (камера работает как обычно)"
         }
         txtStatus.setTextColor(
             ContextCompat.getColor(
                 this,
-                if (camDisabled) R.color.active else R.color.inactive
+                if (enabled) R.color.active else R.color.inactive
             )
         )
     }
