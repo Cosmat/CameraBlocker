@@ -1,5 +1,6 @@
 package com.uvz.camerablocker
 
+import android.app.AlertDialog
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Intent
@@ -73,6 +74,10 @@ class MainActivity : AppCompatActivity() {
             testOverlay()
         }
 
+        findViewById<android.widget.Button>(R.id.btnLicense).setOnClickListener {
+            showLicenseDialog()
+        }
+
         // Автозапуск сервиса при запуске из BootReceiver
         if (intent.getBooleanExtra("auto_start", false)) {
             if (app.isBlockerEnabled()) requestOverlayPermission()
@@ -81,6 +86,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Просроченное приложение не оставляет камеру замком — иначе юзер без камеры
+        if (!License.isValid(this) && app.isCameraSystemDisabled()) {
+            app.setCameraDisabled(false)
+        }
         updateUI()
     }
 
@@ -110,13 +119,36 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, 1002)
     }
 
+    private fun showLicenseDialog() {
+        val input = android.widget.EditText(this)
+        input.hint = "Код продления"
+        AlertDialog.Builder(this)
+            .setTitle("Продление работы")
+            .setMessage("Код выдаёт Алексей на нужную дату. Текущий срок: до ${License.expiryText(this)}.")
+            .setView(input)
+            .setPositiveButton("Применить") { _, _ ->
+                val ok = License.applyCode(this, input.text.toString())
+                android.widget.Toast.makeText(
+                    this,
+                    if (ok) "Продлено до ${License.expiryText(this)}" else "Неверный код",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                updateUI()
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
     private fun updateUI() {
-        val enabled = app.isBlockerEnabled()
+        val expired = !License.isValid(this)
+        val enabled = app.isBlockerEnabled() && !expired
         switchEnable.isChecked = enabled
+        switchEnable.isEnabled = !expired
         seekAlpha.progress = app.getOverlayAlpha()
         txtAlpha.text = "Прозрачность оверлея: ${app.getOverlayAlpha()}%"
         val camDisabled = app.isCameraSystemDisabled()
         txtStatus.text = when {
+            expired -> "Срок работы окончен. Код продления — у Алексея"
             camDisabled -> "Камера ОТКЛЮЧЕНА системой (для проходной)"
             app.isDeviceAdminActive() -> "Админ активен, камера разрешена"
             enabled -> "Включи переключатель и подтверди администратора"

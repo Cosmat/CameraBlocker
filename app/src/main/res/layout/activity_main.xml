@@ -88,6 +88,13 @@
         android:text="Тест: показать чёрный экран на 3 сек"
         android:layout_marginBottom="8dp" />
 
+    <Button
+        android:id="@+id/btnLicense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Код продления"
+        android:layout_marginBottom="8dp" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
